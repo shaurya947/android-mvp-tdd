@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">TDD Demo</string>
+    <string name="forgot_password_activity_title">FORGOT PASSWORD</string>
+    <string name="forgot_password_info_text_cheat">Please enter your username to retrieve your password. Remember, your username may also be your email.</string>
+    <string name="input_username_hint_cheat">Enter your username</string>
+    <string name="btn_request_password_text_cheat">REQUEST PASSWORD</string>
+    <string name="tv_info_text">Please enter your username to retrieve your password. Remember, your username may be your email.</string>
+</resources>
