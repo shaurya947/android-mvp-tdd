@@ -6,9 +6,10 @@ import android.text.Editable
 import android.text.TextWatcher
 import com.example.tsl018.tdddemo.R
 import kotlinx.android.synthetic.main.activity_forgot_password.*
-import org.jetbrains.annotations.TestOnly
+import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 
-class ForgotPasswordActivity: AppCompatActivity(), ForgotPasswordView {
+class ForgotPasswordActivity : AppCompatActivity(), ForgotPasswordView {
     override fun enableRequestPasswordButton() {
         btn_request_password.isEnabled = true
     }
@@ -17,16 +18,15 @@ class ForgotPasswordActivity: AppCompatActivity(), ForgotPasswordView {
         btn_request_password.isEnabled = false
     }
 
-    private lateinit var presenter: ForgotPasswordPresenter
+    val presenter: ForgotPasswordPresenter by inject("a") { parametersOf(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_forgot_password)
-        presenter = ForgotPasswordPresenterImpl(this)
         supportActionBar?.title = "FORGOT PASSWORD"
         btn_request_password.isEnabled = false
 
-        input_username.addTextChangedListener(object: TextWatcher {
+        input_username.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
             }
 
@@ -38,10 +38,5 @@ class ForgotPasswordActivity: AppCompatActivity(), ForgotPasswordView {
             }
 
         })
-    }
-
-    @TestOnly
-    fun setTestPresenter(testPresenter: ForgotPasswordPresenter) {
-        presenter = testPresenter
     }
 }

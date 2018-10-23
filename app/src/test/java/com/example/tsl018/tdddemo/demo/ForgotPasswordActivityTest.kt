@@ -1,20 +1,18 @@
 package com.example.tsl018.tdddemo.demo
 
 import android.view.View
-import android.widget.TextView
 import com.example.tsl018.tdddemo.R
+import com.example.tsl018.tdddemo.modules.presenterModule
 import kotlinx.android.synthetic.main.activity_forgot_password.*
-import kotlinx.android.synthetic.main.activity_forgot_password_cheat.*
 import org.junit.Assert.*
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
+import org.koin.standalone.StandAloneContext.startKoin
+import org.koin.standalone.get
+import org.koin.test.AutoCloseKoinTest
+import org.koin.test.declareMock
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 
@@ -22,18 +20,16 @@ import org.robolectric.RobolectricTestRunner
  * Created by tsl018 on 2018-10-09.
  */
 @RunWith(RobolectricTestRunner::class)
-class ForgotPasswordActivityTest {
+class ForgotPasswordActivityTest : AutoCloseKoinTest() {
     private lateinit var activity: ForgotPasswordActivity
 
-    @Mock
     private lateinit var presenter: ForgotPasswordPresenter
-
-    @Rule
-    @JvmField
-    val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     @Before
     fun setUp() {
+        startKoin(listOf(presenterModule))
+        declareMock<ForgotPasswordPresenter>()
+        presenter = get()
         activity = Robolectric.setupActivity(ForgotPasswordActivity::class.java)
     }
 
@@ -57,7 +53,6 @@ class ForgotPasswordActivityTest {
 
     @Test
     fun invokesPresenterOnTextChange() {
-        activity.setTestPresenter(presenter)
         activity.input_username.setText("kjdhksdfs")
         verify(presenter).onUsernameInputChanged("kjdhksdfs")
     }
