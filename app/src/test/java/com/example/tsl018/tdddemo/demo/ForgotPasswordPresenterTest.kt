@@ -11,11 +11,11 @@ import org.mockito.junit.MockitoRule
 /**
  * Created by tsl018 on 2018-10-09.
  */
-class ForgotPasswordPresenterImplTest {
-    private lateinit var presenter: ForgotPasswordPresenterImpl
+class ForgotPasswordPresenterTest {
+    private lateinit var presenter: ForgotPasswordPresenter
 
     @Mock
-    private lateinit var view: ForgotPasswordView
+    private lateinit var view: ForgotPasswordContract.View
 
     @Rule
     @JvmField
@@ -23,7 +23,7 @@ class ForgotPasswordPresenterImplTest {
 
     @Before
     fun setUp() {
-        presenter = ForgotPasswordPresenterImpl(view)
+        presenter = ForgotPasswordPresenter(view)
     }
 
     @Test

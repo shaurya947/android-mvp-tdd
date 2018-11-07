@@ -8,7 +8,7 @@ import com.example.tsl018.tdddemo.R
 import kotlinx.android.synthetic.main.activity_forgot_password.*
 import org.jetbrains.annotations.TestOnly
 
-class ForgotPasswordActivity: AppCompatActivity(), ForgotPasswordView {
+class ForgotPasswordActivity : AppCompatActivity(), ForgotPasswordContract.View {
     override fun enableRequestPasswordButton() {
         btn_request_password.isEnabled = true
     }
@@ -17,16 +17,16 @@ class ForgotPasswordActivity: AppCompatActivity(), ForgotPasswordView {
         btn_request_password.isEnabled = false
     }
 
-    private lateinit var presenter: ForgotPasswordPresenter
+    private lateinit var presenter: ForgotPasswordContract.Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_forgot_password)
-        presenter = ForgotPasswordPresenterImpl(this)
+        presenter = ForgotPasswordPresenter(this)
         supportActionBar?.title = "FORGOT PASSWORD"
         btn_request_password.isEnabled = false
 
-        input_username.addTextChangedListener(object: TextWatcher {
+        input_username.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
             }
 
@@ -41,7 +41,7 @@ class ForgotPasswordActivity: AppCompatActivity(), ForgotPasswordView {
     }
 
     @TestOnly
-    fun setTestPresenter(testPresenter: ForgotPasswordPresenter) {
+    fun setTestPresenter(testPresenter: ForgotPasswordContract.Presenter) {
         presenter = testPresenter
     }
 }

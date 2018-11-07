@@ -1,10 +1,8 @@
 package com.example.tsl018.tdddemo.demo
 
 import android.view.View
-import android.widget.TextView
 import com.example.tsl018.tdddemo.R
 import kotlinx.android.synthetic.main.activity_forgot_password.*
-import kotlinx.android.synthetic.main.activity_forgot_password_cheat.*
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
@@ -12,7 +10,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import org.robolectric.Robolectric
@@ -26,7 +23,7 @@ class ForgotPasswordActivityTest {
     private lateinit var activity: ForgotPasswordActivity
 
     @Mock
-    private lateinit var presenter: ForgotPasswordPresenter
+    private lateinit var presenter: ForgotPasswordContract.Presenter
 
     @Rule
     @JvmField
