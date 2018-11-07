@@ -20,6 +20,12 @@ class UserInformationCheatActivity : AppCompatActivity(), UserInformationCheatVi
         presenter.loadUserInfo()
     }
 
+    override fun showUserInfo(s: String) {
+    }
+
+    override fun showError() {
+    }
+
     @TestOnly
     fun setTestPresenter(testPresenter: UserInformationCheatPresenter) {
         presenter = testPresenter
