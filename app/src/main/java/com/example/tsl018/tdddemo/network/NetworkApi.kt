@@ -5,6 +5,6 @@ import io.reactivex.Single
 import retrofit2.http.GET
 
 interface NetworkApi {
-    @GET("http://www.mocky.io/v2/5be3140e2f00004300ca2251")
+    @GET("5be5ec862f000049000fc409?mocky-delay=3000ms")
     fun getUser(): Single<User>
 }

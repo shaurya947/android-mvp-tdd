@@ -8,6 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object NetworkClient : NetworkClientInterface {
     private val NetworkApi = Retrofit.Builder()
+            .baseUrl("http://www.mocky.io/v2/")
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()
