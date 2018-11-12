@@ -3,6 +3,9 @@ package com.example.tsl018.tdddemo.demo
 import com.example.tsl018.tdddemo.models.User
 import com.example.tsl018.tdddemo.network.NetworkClientInterface
 import io.reactivex.Single
+import io.reactivex.android.plugins.RxAndroidPlugins
+import io.reactivex.plugins.RxJavaPlugins
+import io.reactivex.schedulers.Schedulers
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -30,6 +33,10 @@ class UserInformationPresenterTest {
 
     @Before
     fun setUp() {
+        RxJavaPlugins.reset()
+        RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
+        RxAndroidPlugins.reset()
+        RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
         presenter = UserInformationPresenter(view, networkClient)
     }
 
