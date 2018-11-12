@@ -9,6 +9,11 @@ class UserInformationPresenter(val view: UserInformationContract.View,
                                val networkClient: NetworkClientInterface)
     : UserInformationContract.Presenter {
     override fun loadUserInfo() {
-        
+        networkClient.getUser()
+                .subscribe({
+                    view.showUserInfo("${it.firstName} ${it.lastName}, ${it.age}")
+                }, {
+                    view.showError()
+                })
     }
 }
