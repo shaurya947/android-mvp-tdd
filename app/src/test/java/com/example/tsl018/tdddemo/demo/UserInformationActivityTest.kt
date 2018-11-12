@@ -7,6 +7,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import org.robolectric.Robolectric
@@ -21,6 +23,9 @@ class UserInformationActivityTest {
     @Rule
     @JvmField
     val mockitoRule: MockitoRule = MockitoJUnit.rule()
+
+    @Mock
+    private lateinit var presenter : UserInformationContract.Presenter
 
     @Before
     fun setUp() {
@@ -39,5 +44,12 @@ class UserInformationActivityTest {
     @Test
     fun hasHiddenInfoViewOnCreate() {
         assertEquals(View.GONE, activity.info_view.visibility)
+    }
+
+    @Test
+    fun invokesPresenterToLoadUserOnStart() {
+        activity.setTestPresenter(presenter)
+        activityController.start()
+        verify(presenter).loadUserInfo()
     }
 }
