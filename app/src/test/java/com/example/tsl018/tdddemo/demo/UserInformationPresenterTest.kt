@@ -1,5 +1,6 @@
 package com.example.tsl018.tdddemo.demo
 
+import com.example.tsl018.tdddemo.BaseRxTest
 import com.example.tsl018.tdddemo.models.User
 import com.example.tsl018.tdddemo.network.NetworkClientInterface
 import io.reactivex.Single
@@ -18,7 +19,7 @@ import org.mockito.junit.MockitoRule
 /**
  * Created by tsl018 on 2018-11-12.
  */
-class UserInformationPresenterTest {
+class UserInformationPresenterTest : BaseRxTest() {
     private lateinit var presenter: UserInformationPresenter
 
     @Mock
@@ -33,10 +34,6 @@ class UserInformationPresenterTest {
 
     @Before
     fun setUp() {
-        RxJavaPlugins.reset()
-        RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
-        RxAndroidPlugins.reset()
-        RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
         presenter = UserInformationPresenter(view, networkClient)
     }
 
