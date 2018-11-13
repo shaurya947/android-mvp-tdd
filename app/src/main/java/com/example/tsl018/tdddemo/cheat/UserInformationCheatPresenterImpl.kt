@@ -1,18 +1,21 @@
 package com.example.tsl018.tdddemo.cheat
 
+import com.example.tsl018.tdddemo.models.User
 import com.example.tsl018.tdddemo.network.NetworkClientInterface
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class UserInformationCheatPresenterImpl(val view: UserInformationCheatView, val networkClient: NetworkClientInterface) : UserInformationCheatPresenter {
     override fun loadUserInfo() {
-        networkClient.getUser()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    view.showUserInfo("${it.firstName} ${it.lastName}, ${it.age}")
-                }, {
-                    view.showError()
-                })
+        networkClient.getUser().enqueue(object : Callback<User> {
+            override fun onResponse(call: Call<User>?, response: Response<User>?) {
+                view.showUserInfo("${response?.body()?.firstName} ${response?.body()?.lastName}, ${response?.body()?.age}")
+            }
+
+            override fun onFailure(call: Call<User>?, t: Throwable?) {
+                view.showError()
+            }
+        })
     }
 }

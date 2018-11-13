@@ -1,8 +1,8 @@
 package com.example.tsl018.tdddemo.network
 
 import com.example.tsl018.tdddemo.models.User
-import io.reactivex.Single
+import retrofit2.Call
 
 interface NetworkClientInterface {
-    fun getUser() : Single<User>
+    fun getUser() : Call<User>
 }
