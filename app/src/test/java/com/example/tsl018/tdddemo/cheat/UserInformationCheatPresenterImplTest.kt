@@ -1,8 +1,11 @@
 package com.example.tsl018.tdddemo.cheat
 
 import com.example.tsl018.tdddemo.BaseRxTest
+import com.example.tsl018.tdddemo.DemoApp
+import com.example.tsl018.tdddemo.database.UserDao
 import com.example.tsl018.tdddemo.models.User
 import com.example.tsl018.tdddemo.network.NetworkClientInterface
+import io.reactivex.Flowable
 import io.reactivex.Single
 import org.junit.Before
 import org.junit.Rule
@@ -23,14 +26,19 @@ class UserInformationCheatPresenterImplTest: BaseRxTest() {
     @Mock
     private lateinit var networkClient: NetworkClientInterface
 
+    @Mock
+    private lateinit var userDao: UserDao
+
     @Rule
     @JvmField
     val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     @Before
     fun setUp() {
-        presenter = UserInformationCheatPresenterImpl(view, networkClient)
-        `when`(networkClient.getUser()).thenReturn(Single.just(User("Jamie", "Postones", 42)))
+        presenter = UserInformationCheatPresenterImpl(view, networkClient, userDao)
+        val user = User("Jamie", "Postones", 42)
+        `when`(networkClient.getUser()).thenReturn(Single.just(user))
+        `when`(userDao.getAllUsers()).thenReturn(Flowable.just(user))
     }
 
     @Test
@@ -48,6 +56,13 @@ class UserInformationCheatPresenterImplTest: BaseRxTest() {
     @Test
     fun invokesViewWithErrorOnFailedLoad() {
         `when`(networkClient.getUser()).thenReturn(Single.error(Exception()))
+        presenter.loadUserInfo()
+        verify(view).showError()
+    }
+
+    @Test
+    fun invokesViewWithErrorOnFailedDBLoad() {
+        `when`(userDao.getAllUsers()).thenReturn(Flowable.error(Exception()))
         presenter.loadUserInfo()
         verify(view).showError()
     }

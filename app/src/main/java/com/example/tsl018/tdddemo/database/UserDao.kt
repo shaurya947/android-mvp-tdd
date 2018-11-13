@@ -5,7 +5,7 @@ import android.arch.persistence.room.Insert
 import android.arch.persistence.room.OnConflictStrategy
 import android.arch.persistence.room.Query
 import com.example.tsl018.tdddemo.models.User
-import io.reactivex.Observable
+import io.reactivex.Flowable
 
 @Dao
 interface UserDao {
@@ -13,5 +13,5 @@ interface UserDao {
     fun insert(user: User)
 
     @Query("SELECT * FROM users")
-    fun getAllUsers(): Observable<User>
+    fun getAllUsers(): Flowable<User>
 }
