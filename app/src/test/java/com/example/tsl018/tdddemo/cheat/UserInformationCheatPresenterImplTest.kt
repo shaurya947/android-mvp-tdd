@@ -1,20 +1,22 @@
 package com.example.tsl018.tdddemo.cheat
 
-import com.example.tsl018.tdddemo.BaseRxTest
 import com.example.tsl018.tdddemo.models.User
 import com.example.tsl018.tdddemo.network.NetworkClientInterface
-import io.reactivex.Single
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.ArgumentCaptor
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import java.lang.Exception
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
-class UserInformationCheatPresenterImplTest: BaseRxTest() {
+class UserInformationCheatPresenterImplTest {
     private lateinit var presenter: UserInformationCheatPresenterImpl
 
     @Mock
@@ -23,6 +25,12 @@ class UserInformationCheatPresenterImplTest: BaseRxTest() {
     @Mock
     private lateinit var networkClient: NetworkClientInterface
 
+    @Mock
+    private lateinit var networkCall: Call<User>
+
+    @Captor
+    private lateinit var callbackCaptor: ArgumentCaptor<Callback<User>>
+
     @Rule
     @JvmField
     val mockitoRule: MockitoRule = MockitoJUnit.rule()
@@ -30,25 +38,25 @@ class UserInformationCheatPresenterImplTest: BaseRxTest() {
     @Before
     fun setUp() {
         presenter = UserInformationCheatPresenterImpl(view, networkClient)
-        `when`(networkClient.getUser()).thenReturn(Single.just(User("Jamie", "Postones", 42)))
-    }
-
-    @Test
-    fun invokesNetworkServiceToLoadUserInfo() {
-        presenter.loadUserInfo()
-        verify(networkClient).getUser()
+        `when`(networkClient.getUser()).thenReturn(networkCall)
     }
 
     @Test
     fun invokesViewWithUserInfoOnSuccessfulLoad() {
         presenter.loadUserInfo()
+        verify(networkClient).getUser()
+        verify(networkCall).enqueue(callbackCaptor.capture())
+        callbackCaptor.value.onResponse(networkCall,
+                Response.success(User("Jamie", "Postones", 42)))
         verify(view).showUserInfo("Jamie Postones, 42")
     }
 
     @Test
     fun invokesViewWithErrorOnFailedLoad() {
-        `when`(networkClient.getUser()).thenReturn(Single.error(Exception()))
         presenter.loadUserInfo()
+        verify(networkClient).getUser()
+        verify(networkCall).enqueue(callbackCaptor.capture())
+        callbackCaptor.value.onFailure(networkCall, Exception())
         verify(view).showError()
     }
 }
