@@ -2,19 +2,17 @@ package com.example.tsl018.tdddemo.cheat
 
 import com.example.tsl018.tdddemo.models.User
 import com.example.tsl018.tdddemo.network.NetworkClientInterface
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers.Unconfined
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class UserInformationCheatPresenterImplTest {
     private lateinit var presenter: UserInformationCheatPresenterImpl
@@ -26,10 +24,7 @@ class UserInformationCheatPresenterImplTest {
     private lateinit var networkClient: NetworkClientInterface
 
     @Mock
-    private lateinit var networkCall: Call<User>
-
-    @Captor
-    private lateinit var callbackCaptor: ArgumentCaptor<Callback<User>>
+    private lateinit var userDeferred: Deferred<User?>
 
     @Rule
     @JvmField
@@ -37,26 +32,23 @@ class UserInformationCheatPresenterImplTest {
 
     @Before
     fun setUp() {
-        presenter = UserInformationCheatPresenterImpl(view, networkClient)
-        `when`(networkClient.getUser()).thenReturn(networkCall)
+        presenter = UserInformationCheatPresenterImpl(view, Unconfined, Unconfined, networkClient)
+        `when`(networkClient.getUser(Unconfined)).thenReturn(userDeferred)
     }
 
     @Test
-    fun invokesViewWithUserInfoOnSuccessfulLoad() {
+    fun invokesViewWithUserInfoOnSuccessfulLoad() = runBlocking {
+        `when`(userDeferred.await()).thenReturn(User("Jamie", "Postones", 42))
         presenter.loadUserInfo()
-        verify(networkClient).getUser()
-        verify(networkCall).enqueue(callbackCaptor.capture())
-        callbackCaptor.value.onResponse(networkCall,
-                Response.success(User("Jamie", "Postones", 42)))
+        verify(networkClient).getUser(Unconfined)
         verify(view).showUserInfo("Jamie Postones, 42")
     }
 
     @Test
-    fun invokesViewWithErrorOnFailedLoad() {
+    fun invokesViewWithErrorOnFailedLoad() = runBlocking {
+        `when`(userDeferred.await()).thenAnswer { throw Exception() }
         presenter.loadUserInfo()
-        verify(networkClient).getUser()
-        verify(networkCall).enqueue(callbackCaptor.capture())
-        callbackCaptor.value.onFailure(networkCall, Exception())
+        verify(networkClient).getUser(Unconfined)
         verify(view).showError()
     }
 }

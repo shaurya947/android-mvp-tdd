@@ -1,12 +1,10 @@
 package com.example.tsl018.tdddemo.network
 
-import com.example.tsl018.tdddemo.models.User
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import kotlin.coroutines.CoroutineContext
 
 object NetworkClient : NetworkClientInterface {
     private val NetworkApi = Retrofit.Builder()
@@ -15,8 +13,8 @@ object NetworkClient : NetworkClientInterface {
             .build()
             .create(NetworkApi::class.java)
 
-    override fun getUser(): Deferred<User?> =
-            CoroutineScope(Dispatchers.Default).async {
+    override fun getUser(coroutineContext: CoroutineContext) =
+            CoroutineScope(coroutineContext).async {
                 NetworkApi.getUser().execute().body()
             }
 }
