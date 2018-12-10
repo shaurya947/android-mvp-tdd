@@ -2,18 +2,17 @@ package com.example.tsl018.tdddemo.demo
 
 import com.example.tsl018.tdddemo.models.User
 import com.example.tsl018.tdddemo.network.NetworkClientInterface
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.Response
 
 /**
@@ -31,32 +30,27 @@ class UserInformationPresenterTest {
     @Mock
     private lateinit var call: Call<User>
 
-    @Captor
-    private lateinit var callbackCaptor: ArgumentCaptor<Callback<User>>
-
     @JvmField
     @Rule
     val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     @Before
     fun setUp() {
-        presenter = UserInformationPresenter(view, networkClient)
+        presenter = UserInformationPresenter(view, networkClient, Dispatchers.Unconfined, Dispatchers.Unconfined)
         `when`(networkClient.getUser()).thenReturn(call)
     }
 
     @Test
-    fun invokesViewWithUserInfoOnSuccess() {
+    fun invokesViewWithUserInfoOnSuccess() = runBlocking {
+        `when`(call.execute()).thenReturn(Response.success(User("Jamie", "Postones", 42)))
         presenter.loadUserInfo()
-        verify(call).enqueue(callbackCaptor.capture())
-        callbackCaptor.value.onResponse(call, Response.success(User("Jamie", "Postones", 42)))
         verify(view).showUserInfo("Jamie Postones, 42")
     }
 
     @Test
-    fun invokesViewWithErrorOnException() {
+    fun invokesViewWithErrorOnException() = runBlocking {
+        `when`(call.execute()).thenAnswer { throw Exception() }
         presenter.loadUserInfo()
-        verify(call).enqueue(callbackCaptor.capture())
-        callbackCaptor.value.onFailure(call, Exception())
         verify(view).showError()
     }
 }

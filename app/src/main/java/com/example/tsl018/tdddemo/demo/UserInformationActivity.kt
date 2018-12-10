@@ -6,14 +6,29 @@ import android.view.View
 import com.example.tsl018.tdddemo.R
 import com.example.tsl018.tdddemo.network.NetworkClient
 import kotlinx.android.synthetic.main.activity_user_information_cheat.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlin.coroutines.CoroutineContext
 
-class UserInformationActivity : AppCompatActivity(), UserInformationContract.View {
+class UserInformationActivity : AppCompatActivity(), UserInformationContract.View, CoroutineScope {
+    lateinit var job: Job
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
     private lateinit var presenter: UserInformationContract.Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        job = Job()
         setContentView(R.layout.activity_user_information_cheat)
-        presenter = UserInformationPresenter(this, NetworkClient)
+        presenter = UserInformationPresenter(this, NetworkClient, coroutineContext, Dispatchers.IO)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
     }
 
     override fun onStart() {
