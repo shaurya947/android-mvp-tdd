@@ -3,7 +3,6 @@ package com.example.tsl018.tdddemo.demo
 import com.example.tsl018.tdddemo.network.NetworkClientInterface
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -15,17 +14,14 @@ class UserInformationPresenter(val view: UserInformationContract.View,
                                val IOContext: CoroutineContext)
     : UserInformationContract.Presenter {
     override fun loadUserInfo() {
-        CoroutineScope(IOContext).launch {
+        CoroutineScope(mainContext).launch {
             try {
-                networkClient.getUser().execute().body()?.let {
-                    withContext(mainContext) {
-                        view.showUserInfo("${it.firstName} ${it.lastName}, ${it.age}")
-                    }
+                val userCall = networkClient.getUser(IOContext)
+                userCall.await()?.let {
+                    view.showUserInfo("${it.firstName} ${it.lastName}, ${it.age}")
                 }
             } catch (e: Exception) {
-                withContext(mainContext) {
-                    view.showError()
-                }
+                view.showError()
             }
         }
     }

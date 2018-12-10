@@ -1,8 +1,9 @@
 package com.example.tsl018.tdddemo.network
 
 import com.example.tsl018.tdddemo.models.User
-import retrofit2.Call
+import kotlinx.coroutines.Deferred
+import kotlin.coroutines.CoroutineContext
 
 interface NetworkClientInterface {
-    fun getUser() : Call<User>
+    fun getUser(coroutineContext: CoroutineContext) : Deferred<User?>
 }
