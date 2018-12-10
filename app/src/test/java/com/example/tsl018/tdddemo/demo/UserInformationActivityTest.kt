@@ -52,4 +52,20 @@ class UserInformationActivityTest {
         activityController.start()
         verify(presenter).loadUserInfo()
     }
+
+    @Test
+    fun displaysUserInfoWhenInvoked() {
+        activity.showUserInfo("Jamie Postones, 42")
+        assertEquals(View.GONE, activity.loading_view.visibility)
+        assertEquals(View.VISIBLE, activity.info_view.visibility)
+        assertEquals("Jamie Postones, 42", activity.info_view.text)
+    }
+
+    @Test
+    fun displaysErrorWhenInvoked() {
+        activity.showError()
+        assertEquals(View.GONE, activity.loading_view.visibility)
+        assertEquals(View.VISIBLE, activity.info_view.visibility)
+        assertEquals("ERROR!", activity.info_view.text)
+    }
 }
