@@ -5,5 +5,5 @@ import kotlinx.coroutines.Deferred
 import kotlin.coroutines.CoroutineContext
 
 interface NetworkClientInterface {
-    fun getUser(coroutineContext: CoroutineContext) : Deferred<User?>
+    fun getUser() : Deferred<User?>
 }

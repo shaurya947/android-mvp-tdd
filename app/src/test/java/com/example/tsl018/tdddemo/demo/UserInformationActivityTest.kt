@@ -1,34 +1,33 @@
 package com.example.tsl018.tdddemo.demo
 
 import android.view.View
+import com.example.tsl018.tdddemo.di.presenterModule
 import kotlinx.android.synthetic.main.activity_user_information_cheat.*
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
+import org.koin.standalone.StandAloneContext.startKoin
+import org.koin.standalone.get
+import org.koin.test.AutoCloseKoinTest
+import org.koin.test.declareMock
 import org.mockito.Mockito.verify
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.android.controller.ActivityController
 
 @RunWith(RobolectricTestRunner::class)
-class UserInformationActivityTest {
+class UserInformationActivityTest : AutoCloseKoinTest() {
     private lateinit var activityController: ActivityController<UserInformationActivity>
     private lateinit var activity: UserInformationActivity
-
-    @Rule
-    @JvmField
-    val mockitoRule: MockitoRule = MockitoJUnit.rule()
-
-    @Mock
-    private lateinit var presenter : UserInformationContract.Presenter
+    private lateinit var presenter: UserInformationContract.Presenter
 
     @Before
     fun setUp() {
+        startKoin(listOf(presenterModule))
+        declareMock<UserInformationContract.Presenter>()
+        presenter = get()
+
         activityController = Robolectric.buildActivity(UserInformationActivity::class.java)
         activity = activityController.get()
 
@@ -48,7 +47,6 @@ class UserInformationActivityTest {
 
     @Test
     fun invokesPresenterToLoadUserOnStart() {
-        activity.setTestPresenter(presenter)
         activityController.start()
         verify(presenter).loadUserInfo()
     }

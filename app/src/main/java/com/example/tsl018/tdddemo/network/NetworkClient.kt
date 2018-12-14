@@ -1,20 +1,14 @@
 package com.example.tsl018.tdddemo.network
 
+import com.example.tsl018.tdddemo.di.IO_CONTEXT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import kotlin.coroutines.CoroutineContext
+import org.koin.standalone.KoinComponent
+import org.koin.standalone.get
 
-object NetworkClient : NetworkClientInterface {
-    private val NetworkApi = Retrofit.Builder()
-            .baseUrl("http://www.mocky.io/v2/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(NetworkApi::class.java)
-
-    override fun getUser(coroutineContext: CoroutineContext) =
-            CoroutineScope(coroutineContext).async {
-                NetworkApi.getUser().execute().body()
+class NetworkClient(private val networkApi: NetworkApi) : NetworkClientInterface, KoinComponent {
+    override fun getUser() =
+            CoroutineScope(get(IO_CONTEXT)).async {
+                networkApi.getUser().execute().body()
             }
 }

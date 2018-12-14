@@ -1,34 +1,18 @@
 package com.example.tsl018.tdddemo.demo
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.example.tsl018.tdddemo.R
-import com.example.tsl018.tdddemo.network.NetworkClient
 import kotlinx.android.synthetic.main.activity_user_information_cheat.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlin.coroutines.CoroutineContext
+import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 
-class UserInformationActivity : AppCompatActivity(), UserInformationContract.View, CoroutineScope {
-    lateinit var job: Job
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
-
-    private lateinit var presenter: UserInformationContract.Presenter
+class UserInformationActivity : BaseActivity(), UserInformationContract.View {
+    private val presenter: UserInformationContract.Presenter by inject { parametersOf(this, coroutineContext) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        job = Job()
         setContentView(R.layout.activity_user_information_cheat)
-        presenter = UserInformationPresenter(this, NetworkClient, coroutineContext, Dispatchers.IO)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        job.cancel()
     }
 
     override fun onStart() {
@@ -46,9 +30,5 @@ class UserInformationActivity : AppCompatActivity(), UserInformationContract.Vie
         loading_view.visibility = View.GONE
         info_view.visibility = View.VISIBLE
         info_view.text = "ERROR!"
-    }
-
-    fun setTestPresenter(testPresenter: UserInformationContract.Presenter) {
-        presenter = testPresenter
     }
 }
