@@ -43,8 +43,10 @@ class UserInformationActivityTest {
     }
 
     @Test
-    fun hasHiddenInfoViewOnCreate() {
+    fun hasHiddenInfoViewAndUpdateButtonOnCreate() {
         assertEquals(View.GONE, activity.info_view.visibility)
+        assertEquals(View.GONE, activity.btn_increment_age.visibility)
+        assertEquals("increment age", activity.btn_increment_age.text.toString().toLowerCase())
     }
 
     @Test
@@ -59,6 +61,7 @@ class UserInformationActivityTest {
         activity.showUserInfo("Jamie Postones, 42")
         assertEquals(View.GONE, activity.loading_view.visibility)
         assertEquals(View.VISIBLE, activity.info_view.visibility)
+        assertEquals(View.VISIBLE, activity.btn_increment_age.visibility)
         assertEquals("Jamie Postones, 42", activity.info_view.text)
     }
 
@@ -67,6 +70,14 @@ class UserInformationActivityTest {
         activity.showError()
         assertEquals(View.GONE, activity.loading_view.visibility)
         assertEquals(View.VISIBLE, activity.info_view.visibility)
+        assertEquals(View.GONE, activity.btn_increment_age.visibility)
         assertEquals("ERROR!", activity.info_view.text)
+    }
+
+    @Test
+    fun `clicking increment age button notifies presenter`() {
+        activity.setTestPresenter(presenter)
+        activity.btn_increment_age.performClick()
+        verify(presenter).onIncrementButtonClicked()
     }
 }

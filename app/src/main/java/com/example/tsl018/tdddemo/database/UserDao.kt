@@ -1,9 +1,6 @@
 package com.example.tsl018.tdddemo.database
 
-import android.arch.persistence.room.Dao
-import android.arch.persistence.room.Insert
-import android.arch.persistence.room.OnConflictStrategy
-import android.arch.persistence.room.Query
+import android.arch.persistence.room.*
 import com.example.tsl018.tdddemo.models.User
 
 @Dao
@@ -13,4 +10,7 @@ interface UserDao {
 
     @Query("SELECT * FROM users")
     fun getAllUsers(): List<User>
+
+    @Update
+    fun updateUser(user: User)
 }

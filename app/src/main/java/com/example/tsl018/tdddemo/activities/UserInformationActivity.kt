@@ -27,6 +27,7 @@ class UserInformationActivity : AppCompatActivity(), UserInformationContract.Vie
         job = Job()
         setContentView(R.layout.activity_user_information)
         presenter = UserInformationPresenter(this, coroutineContext, Dispatchers.IO, NetworkClient, DemoApp.DB)
+        btn_increment_age.setOnClickListener { presenter.onIncrementButtonClicked() }
     }
 
     override fun onStart() {
@@ -43,6 +44,7 @@ class UserInformationActivity : AppCompatActivity(), UserInformationContract.Vie
         loading_view.visibility = View.GONE
         info_view.visibility = View.VISIBLE
         info_view.text = s
+        btn_increment_age.visibility = View.VISIBLE
     }
 
     override fun showError() {

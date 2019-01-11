@@ -8,5 +8,6 @@ interface UserInformationContract {
 
     interface Presenter {
         fun loadUserInfo()
+        fun onIncrementButtonClicked()
     }
 }

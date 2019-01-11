@@ -83,4 +83,14 @@ class UserInformationPresenterTest {
         verify(userDao).getAllUsers()
         verify(view).showError()
     }
+
+    @Test
+    fun `updates user in database and refreshes view`() = runBlocking {
+        val updatedUser = User(user.firstName, user.lastName, user.age.plus(1))
+        `when`(userDao.getAllUsers()).thenReturn(listOf(updatedUser))
+        presenter.user = user
+        presenter.onIncrementButtonClicked()
+        verify(userDao).updateUser(updatedUser)
+        verify(view).showUserInfo("Jamie Postones, 43")
+    }
 }
