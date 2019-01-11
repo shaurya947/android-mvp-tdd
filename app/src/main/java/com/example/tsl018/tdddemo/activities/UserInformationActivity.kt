@@ -3,6 +3,7 @@ package com.example.tsl018.tdddemo.activities
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import com.example.tsl018.tdddemo.DemoApp
 import com.example.tsl018.tdddemo.R
 import com.example.tsl018.tdddemo.contract.UserInformationContract
 import com.example.tsl018.tdddemo.network.NetworkClient
@@ -25,7 +26,7 @@ class UserInformationActivity : AppCompatActivity(), UserInformationContract.Vie
         super.onCreate(savedInstanceState)
         job = Job()
         setContentView(R.layout.activity_user_information)
-        presenter = UserInformationPresenter(this, coroutineContext, Dispatchers.IO, NetworkClient)
+        presenter = UserInformationPresenter(this, coroutineContext, Dispatchers.IO, NetworkClient, DemoApp.DB)
     }
 
     override fun onStart() {
