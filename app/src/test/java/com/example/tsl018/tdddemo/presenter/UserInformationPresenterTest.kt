@@ -1,7 +1,9 @@
-package com.example.tsl018.tdddemo.cheat
+package com.example.tsl018.tdddemo.presenter
 
+import com.example.tsl018.tdddemo.contract.UserInformationContract
 import com.example.tsl018.tdddemo.models.User
 import com.example.tsl018.tdddemo.network.NetworkClientInterface
+import com.example.tsl018.tdddemo.presenter.UserInformationPresenter
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers.Unconfined
 import kotlinx.coroutines.runBlocking
@@ -14,11 +16,11 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
-class UserInformationCheatPresenterImplTest {
-    private lateinit var presenter: UserInformationCheatPresenterImpl
+class UserInformationPresenterTest {
+    private lateinit var presenter: UserInformationPresenter
 
     @Mock
-    private lateinit var view: UserInformationCheatView
+    private lateinit var view: UserInformationContract.View
 
     @Mock
     private lateinit var networkClient: NetworkClientInterface
@@ -32,7 +34,7 @@ class UserInformationCheatPresenterImplTest {
 
     @Before
     fun setUp() {
-        presenter = UserInformationCheatPresenterImpl(view, Unconfined, Unconfined, networkClient)
+        presenter = UserInformationPresenter(view, Unconfined, Unconfined, networkClient)
         `when`(networkClient.getUser(Unconfined)).thenReturn(userDeferred)
     }
 

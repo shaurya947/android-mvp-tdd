@@ -1,7 +1,8 @@
-package com.example.tsl018.tdddemo.cheat
+package com.example.tsl018.tdddemo.activities
 
 import android.view.View
-import kotlinx.android.synthetic.main.activity_user_information_cheat.*
+import com.example.tsl018.tdddemo.contract.UserInformationContract
+import kotlinx.android.synthetic.main.activity_user_information.*
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -16,12 +17,12 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.android.controller.ActivityController
 
 @RunWith(RobolectricTestRunner::class)
-class UserInformationCheatActivityTest {
-    private lateinit var activityController: ActivityController<UserInformationCheatActivity>
-    private lateinit var activity: UserInformationCheatActivity
+class UserInformationActivityTest {
+    private lateinit var activityController: ActivityController<UserInformationActivity>
+    private lateinit var activity: UserInformationActivity
 
     @Mock
-    private lateinit var presenter: UserInformationCheatPresenter
+    private lateinit var presenter: UserInformationContract.Presenter
 
     @Rule
     @JvmField
@@ -29,7 +30,7 @@ class UserInformationCheatActivityTest {
 
     @Before
     fun setUp() {
-        activityController = Robolectric.buildActivity(UserInformationCheatActivity::class.java)
+        activityController = Robolectric.buildActivity(UserInformationActivity::class.java)
         activity = activityController.get()
 
         activityController.create()
