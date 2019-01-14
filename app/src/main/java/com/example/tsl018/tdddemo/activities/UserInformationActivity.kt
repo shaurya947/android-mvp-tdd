@@ -1,60 +1,65 @@
 package com.example.tsl018.tdddemo.activities
 
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.example.tsl018.tdddemo.DemoApp
 import com.example.tsl018.tdddemo.R
-import com.example.tsl018.tdddemo.contract.UserInformationContract
 import com.example.tsl018.tdddemo.network.NetworkClient
-import com.example.tsl018.tdddemo.presenter.UserInformationPresenter
+import com.example.tsl018.tdddemo.viewmodels.UserInformationViewModel
+import com.example.tsl018.tdddemo.viewmodels.factory.UserInformationViewModelFactory
 import kotlinx.android.synthetic.main.activity_user_information.*
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import org.jetbrains.annotations.TestOnly
-import kotlin.coroutines.CoroutineContext
 
-class UserInformationActivity : AppCompatActivity(), UserInformationContract.View, CoroutineScope {
-    lateinit var job: Job
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
-
-    private lateinit var presenter: UserInformationContract.Presenter
+class UserInformationActivity : AppCompatActivity() {
+    private lateinit var viewModel: UserInformationViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        job = Job()
         setContentView(R.layout.activity_user_information)
-        presenter = UserInformationPresenter(this, coroutineContext, Dispatchers.IO, NetworkClient, DemoApp.DB)
-        btn_increment_age.setOnClickListener { presenter.onIncrementButtonClicked() }
+
+        viewModel = ViewModelProviders.of(this,
+                UserInformationViewModelFactory(Dispatchers.Main, Dispatchers.IO, NetworkClient, DemoApp.DB))
+                .get(UserInformationViewModel::class.java)
     }
 
     override fun onStart() {
         super.onStart()
-        presenter.loadUserInfo()
+        subscribeUi()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        job.cancel()
-    }
+    private fun subscribeUi() {
+        viewModel.getUser().observe(this, Observer { user ->
+            user?.let {
+                info_view.visibility = View.VISIBLE
+                info_view.text = "${it.firstName} ${it.lastName}, ${it.age}"
+                btn_increment_age.visibility = View.VISIBLE
+            }
+        })
 
-    override fun showUserInfo(s: String) {
-        loading_view.visibility = View.GONE
-        info_view.visibility = View.VISIBLE
-        info_view.text = s
-        btn_increment_age.visibility = View.VISIBLE
-    }
+        viewModel.isLoading().observe(this, Observer { isLoading ->
+            isLoading?.let {
+                loading_view.visibility = if (it) View.VISIBLE else View.GONE
+            }
+        })
 
-    override fun showError() {
-        loading_view.visibility = View.GONE
-        info_view.visibility = View.VISIBLE
-        info_view.text = "ERROR!"
+        viewModel.isError().observe(this, Observer { isError ->
+            isError?.let {
+                if (it) {
+                    info_view.visibility = View.VISIBLE
+                    info_view.text = "ERROR!"
+                }
+            }
+        })
+
+        btn_increment_age.setOnClickListener { viewModel.onIncrementAgeClicked() }
     }
 
     @TestOnly
-    fun setTestPresenter(testPresenter: UserInformationContract.Presenter) {
-        presenter = testPresenter
+    fun setTestViewModel(testViewModel: UserInformationViewModel) {
+        viewModel = testViewModel
     }
 }
