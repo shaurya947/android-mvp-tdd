@@ -54,7 +54,7 @@ class UserInformationActivityTest {
 
     @Before
     fun setUp() {
-        `when`(viewModel.getUser()).thenReturn(userLiveData)
+        `when`(viewModel.user).thenReturn(userLiveData)
         `when`(viewModel.isLoading()).thenReturn(isLoadingLiveData)
         `when`(viewModel.isError()).thenReturn(isErrorLiveData)
 

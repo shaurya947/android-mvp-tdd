@@ -32,7 +32,7 @@ class UserInformationActivity : AppCompatActivity() {
     }
 
     private fun subscribeUi() {
-        viewModel.getUser().observe(this, Observer { user ->
+        viewModel.user.observe(this, Observer { user ->
             user?.let {
                 info_view.visibility = View.VISIBLE
                 info_view.text = "${it.firstName} ${it.lastName}, ${it.age}"

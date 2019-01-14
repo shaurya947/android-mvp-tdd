@@ -13,6 +13,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnit
@@ -23,8 +24,6 @@ import java.lang.Exception
 @RunWith(RobolectricTestRunner::class)
 class UserInformationViewModelTest {
     private lateinit var viewModel: UserInformationViewModel
-
-    private lateinit var userLiveData: LiveData<User>
 
     private lateinit var isLoadingLiveData: LiveData<Boolean>
 
@@ -44,6 +43,9 @@ class UserInformationViewModelTest {
     @Mock
     private lateinit var userDeferred: Deferred<User?>
 
+    @Mock
+    private lateinit var userListLiveData: LiveData<List<User>>
+
     @Rule
     @JvmField
     val mockitoRule: MockitoRule = MockitoJUnit.rule()
@@ -51,6 +53,7 @@ class UserInformationViewModelTest {
     @Before
     fun setUp() {
         `when`(database.userDao()).thenReturn(userDao)
+        `when`(userDao.getAllUsers()).thenReturn(userListLiveData)
         `when`(networkClient.getUser(Dispatchers.Unconfined)).thenReturn(userDeferred)
 
         viewModel = UserInformationViewModel(Dispatchers.Unconfined, Dispatchers.Unconfined, networkClient, database)
@@ -74,13 +77,13 @@ class UserInformationViewModelTest {
 
     @Test
     fun `does network call to get user if not locally present`() = runBlocking {
-        `when`(userDao.getAllUsers()).thenReturn(listOf())
+        `when`(userListLiveData.value).thenReturn(listOf())
         `when`(userDeferred.await()).thenReturn(user)
 
-        userLiveData = viewModel.getUser()
+        viewModel.user.observeForever {  }
         verify(networkClient).getUser(Dispatchers.Unconfined)
         verify(userDao).insert(user)
-        assertEquals(user, userLiveData.value)
+        assertEquals(user, viewModel.user.value)
 
         val isLoading = isLoadingLiveData.value
         assertNotNull(isLoading)
@@ -94,12 +97,12 @@ class UserInformationViewModelTest {
 
     @Test
     fun `retrieves local user without network call if present`() = runBlocking {
-        `when`(userDao.getAllUsers()).thenReturn(listOf(user))
+        `when`(userListLiveData.value).thenReturn(listOf(user))
 
-        userLiveData = viewModel.getUser()
+        viewModel.user.observeForever {  }
         verify(userDao).getAllUsers()
         verifyZeroInteractions(networkClient)
-        assertEquals(user, userLiveData.value)
+        assertEquals(user, viewModel.user.value)
 
         val isLoading = isLoadingLiveData.value
         assertNotNull(isLoading)
@@ -113,10 +116,10 @@ class UserInformationViewModelTest {
 
     @Test
     fun `throws error if problem loading user from network`() = runBlocking {
-        `when`(userDao.getAllUsers()).thenReturn(listOf())
+        `when`(userListLiveData.value).thenReturn(listOf())
         `when`(userDeferred.await()).thenAnswer { throw Exception() }
 
-        userLiveData = viewModel.getUser()
+        viewModel.user.observeForever {  }
         verify(networkClient).getUser(Dispatchers.Unconfined)
 
         val isLoading = isLoadingLiveData.value
@@ -130,12 +133,14 @@ class UserInformationViewModelTest {
     }
 
     @Test
-    fun `throws error if problem loading user from database`() = runBlocking {
-        `when`(userDao.getAllUsers()).thenAnswer { throw Exception() }
+    fun `throws error if problem inserting user into database`() = runBlocking {
+        `when`(userListLiveData.value).thenReturn(listOf())
+        `when`(userDao.insert(user)).thenAnswer { throw Exception() }
 
-        userLiveData = viewModel.getUser()
+        viewModel.user.observeForever {  }
         verify(userDao).getAllUsers()
-        verifyZeroInteractions(networkClient)
+        verify(networkClient).getUser(Dispatchers.Unconfined)
+        verify(userDao).updateUser(user)
 
         val isLoading = isLoadingLiveData.value
         assertNotNull(isLoading)
@@ -149,8 +154,8 @@ class UserInformationViewModelTest {
 
     @Test
     fun `updates user age in database when invoked`() = runBlocking {
-        `when`(userDao.getAllUsers()).thenReturn(listOf(user))
-        userLiveData = viewModel.getUser()
+        `when`(userListLiveData.value).thenReturn(listOf(user))
+        viewModel.user.observeForever {  }
 
         viewModel.onIncrementAgeClicked()
         verify(userDao).updateUser(User(user.firstName, user.lastName, user.age.plus(1)))

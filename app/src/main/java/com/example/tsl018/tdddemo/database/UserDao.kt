@@ -1,5 +1,6 @@
 package com.example.tsl018.tdddemo.database
 
+import android.arch.lifecycle.LiveData
 import android.arch.persistence.room.*
 import com.example.tsl018.tdddemo.models.User
 
@@ -9,7 +10,7 @@ interface UserDao {
     fun insert(user: User)
 
     @Query("SELECT * FROM users")
-    fun getAllUsers(): List<User>
+    fun getAllUsers(): LiveData<List<User>>
 
     @Update
     fun updateUser(user: User)

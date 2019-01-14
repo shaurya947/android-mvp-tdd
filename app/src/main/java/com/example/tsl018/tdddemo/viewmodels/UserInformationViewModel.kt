@@ -2,6 +2,7 @@ package com.example.tsl018.tdddemo.viewmodels
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModel
 import com.example.tsl018.tdddemo.database.DemoDatabase
 import com.example.tsl018.tdddemo.models.User
@@ -13,20 +14,19 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 open class UserInformationViewModel(mainContext: CoroutineContext,
-                               private val IOContext: CoroutineContext,
-                               private val networkClient: NetworkClientInterface,
-                               private val database: DemoDatabase) : ViewModel(), CoroutineScope {
+                                    private val IOContext: CoroutineContext,
+                                    private val networkClient: NetworkClientInterface,
+                                    private val database: DemoDatabase) : ViewModel(), CoroutineScope {
     private val job = Job()
     override val coroutineContext = mainContext + job
 
-    private lateinit var userLiveData: MutableLiveData<User>
-
-    open fun getUser(): LiveData<User> {
-        if (!::userLiveData.isInitialized) {
-            userLiveData = MutableLiveData()
+    open val user: LiveData<User> = Transformations.map(database.userDao().getAllUsers()) { users ->
+        if (users.isNullOrEmpty()) {
             loadUserInfo()
+        } else {
+            isLoadingLiveData.value = false
         }
-        return userLiveData
+        users.firstOrNull()
     }
 
     private lateinit var isLoadingLiveData: MutableLiveData<Boolean>
@@ -57,14 +57,9 @@ open class UserInformationViewModel(mainContext: CoroutineContext,
     private fun loadUserInfo() {
         launch {
             try {
-                val users = withContext(IOContext) { database.userDao().getAllUsers() }
-                val user = users.firstOrNull()
-                user?.let { userLiveData.value = it } ?: run {
-                    val newUser = networkClient.getUser(IOContext).await()
-                    newUser?.let {
-                        withContext(IOContext) { database.userDao().insert(it) }
-                        userLiveData.value = it
-                    }
+                val newUser = networkClient.getUser(IOContext).await()
+                newUser?.let {
+                    withContext(IOContext) { database.userDao().insert(it) }
                 }
             } catch (e: Exception) {
                 isErrorLiveData.value = true
@@ -76,10 +71,9 @@ open class UserInformationViewModel(mainContext: CoroutineContext,
 
     open fun onIncrementAgeClicked() {
         launch {
-            userLiveData.value?.let {
+            user.value?.let {
                 val updatedUser = User(it.firstName, it.lastName, it.age.plus(1))
                 withContext(IOContext) { database.userDao().updateUser(updatedUser) }
-                loadUserInfo()
             }
         }
     }
