@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:text="Increment Age"
             android:onClick="@{() -> viewModel.onIncrementAgeClicked()}"
-            android:visibility="@{viewModel.isLoading() ? View.GONE : View.VISIBLE}"
+            android:visibility="@{!viewModel.isLoading() &amp;&amp; !viewModel.isError() ? View.VISIBLE : View.GONE}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/info_view" />
 

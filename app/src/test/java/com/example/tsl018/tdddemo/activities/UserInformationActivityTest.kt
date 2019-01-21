@@ -1,8 +1,9 @@
 package com.example.tsl018.tdddemo.activities
 
+import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.Observer
+import android.arch.lifecycle.LifecycleRegistry
+import android.arch.lifecycle.MutableLiveData
 import android.view.View
 import com.example.tsl018.tdddemo.models.User
 import com.example.tsl018.tdddemo.viewmodels.UserInformationViewModel
@@ -12,9 +13,10 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.*
+import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Spy
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import org.robolectric.Robolectric
@@ -27,26 +29,22 @@ class UserInformationActivityTest {
 
     private lateinit var activityController: ActivityController<UserInformationActivity>
 
+    private lateinit var lifecycleRegistry: LifecycleRegistry
+
     @Mock
     private lateinit var viewModel: UserInformationViewModel
 
     @Mock
-    private lateinit var userLiveData: LiveData<User>
+    private lateinit var lifecycleOwner: LifecycleOwner
 
-    @Mock
-    private lateinit var isLoadingLiveData: LiveData<Boolean>
+    @Spy
+    private lateinit var userLiveData: MutableLiveData<User>
 
-    @Mock
-    private lateinit var isErrorLiveData: LiveData<Boolean>
+    @Spy
+    private lateinit var isLoadingLiveData: MutableLiveData<Boolean>
 
-    @Captor
-    private lateinit var userObserverCaptor: ArgumentCaptor<Observer<User>>
-
-    @Captor
-    private lateinit var isLoadingObserverCaptor: ArgumentCaptor<Observer<Boolean>>
-
-    @Captor
-    private lateinit var isErrorObserverCaptor: ArgumentCaptor<Observer<Boolean>>
+    @Spy
+    private lateinit var isErrorLiveData: MutableLiveData<Boolean>
 
     @Rule
     @JvmField
@@ -54,30 +52,35 @@ class UserInformationActivityTest {
 
     @Before
     fun setUp() {
+        isLoadingLiveData.value = true
+        isErrorLiveData.value = false
+
         `when`(viewModel.getUser()).thenReturn(userLiveData)
         `when`(viewModel.isLoading()).thenReturn(isLoadingLiveData)
         `when`(viewModel.isError()).thenReturn(isErrorLiveData)
+
+        lifecycleRegistry = LifecycleRegistry(lifecycleOwner)
+        `when`(lifecycleOwner.lifecycle).thenReturn(lifecycleRegistry)
 
         activityController = Robolectric.buildActivity(UserInformationActivity::class.java)
         activity = activityController.get()
 
         activityController.create()
         activity.setTestViewModel(viewModel)
-
-        activityController.start()
-        verify(userLiveData).observe(ArgumentMatchers.any(LifecycleOwner::class.java), userObserverCaptor.capture())
-        verify(isLoadingLiveData).observe(ArgumentMatchers.any(LifecycleOwner::class.java), isLoadingObserverCaptor.capture())
-        verify(isErrorLiveData).observe(ArgumentMatchers.any(LifecycleOwner::class.java), isErrorObserverCaptor.capture())
     }
 
     @Test
     fun hasVisibleLoadingViewOnCreate() {
+        startActivity()
+
         assertEquals("loading", activity.loading_view.text)
         assertEquals(View.VISIBLE, activity.loading_view.visibility)
     }
 
     @Test
     fun hasHiddenInfoViewAndUpdateButtonOnCreate() {
+        startActivity()
+
         assertEquals(View.GONE, activity.info_view.visibility)
         assertEquals(View.GONE, activity.btn_increment_age.visibility)
         assertEquals("increment age", activity.btn_increment_age.text.toString().toLowerCase())
@@ -85,9 +88,12 @@ class UserInformationActivityTest {
 
     @Test
     fun displaysUserInfoWhenInvoked() {
-        userObserverCaptor.value.onChanged(User("Jamie", "Postones", 42))
-        isErrorObserverCaptor.value.onChanged(false)
-        isLoadingObserverCaptor.value.onChanged(false)
+        userLiveData.value = User("Jamie", "Postones", 42)
+        isErrorLiveData.value = false
+        isLoadingLiveData.value = false
+
+        startActivity()
+
         assertEquals(View.GONE, activity.loading_view.visibility)
         assertEquals(View.VISIBLE, activity.info_view.visibility)
         assertEquals(View.VISIBLE, activity.btn_increment_age.visibility)
@@ -96,8 +102,11 @@ class UserInformationActivityTest {
 
     @Test
     fun displaysErrorWhenInvoked() {
-        isErrorObserverCaptor.value.onChanged(true)
-        isLoadingObserverCaptor.value.onChanged(false)
+        isErrorLiveData.value = true
+        isLoadingLiveData.value = false
+
+        startActivity()
+
         assertEquals(View.GONE, activity.loading_view.visibility)
         assertEquals(View.VISIBLE, activity.info_view.visibility)
         assertEquals(View.GONE, activity.btn_increment_age.visibility)
@@ -106,7 +115,15 @@ class UserInformationActivityTest {
 
     @Test
     fun `clicking increment age button notifies presenter`() {
+        startActivity()
+
         activity.btn_increment_age.performClick()
         verify(viewModel).onIncrementAgeClicked()
+    }
+
+    private fun startActivity() {
+        activity.setTestLifecycleOwner(lifecycleOwner)
+        activityController.start()
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
     }
 }
